@@ -1,7 +1,7 @@
 package noob.restmvc.services;
 
 import lombok.extern.slf4j.Slf4j;
-import noob.restmvc.model.Book;
+import noob.restmvc.model.BookDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -12,11 +12,11 @@ import java.util.*;
 @Slf4j
 @Service
 public class BookServiceImpl implements BookService {
-    Map<UUID,Book> booksMap;
+    Map<UUID, BookDTO> booksMap;
 
     public BookServiceImpl() {
         booksMap = new HashMap<>();
-        Book book1 = Book.builder()
+        BookDTO bookDTO1 = BookDTO.builder()
                .id(UUID.randomUUID())
                .version(1)
                .title("Java How To")
@@ -27,7 +27,7 @@ public class BookServiceImpl implements BookService {
                .updatedDate(LocalDateTime.now())
                .price(new BigDecimal("19.34"))
                .build();
-        Book book2 = Book.builder()
+        BookDTO bookDTO2 = BookDTO.builder()
                 .id(UUID.randomUUID())
                 .version(1)
                 .title("Data Structure And Algorithms ")
@@ -39,7 +39,7 @@ public class BookServiceImpl implements BookService {
                 .price(new BigDecimal("13.44"))
                 .build();
 
-        Book book3 = Book.builder()
+        BookDTO bookDTO3 = BookDTO.builder()
                 .id(UUID.randomUUID())
                 .version(1)
                 .title("C++ How To")
@@ -51,48 +51,48 @@ public class BookServiceImpl implements BookService {
                 .price(new BigDecimal("17.24"))
                 .build();
 
-        booksMap.put(book1.getId(),book1);
-        booksMap.put(book2.getId(),book2);
-        booksMap.put(book3.getId(),book3);
+        booksMap.put(bookDTO1.getId(), bookDTO1);
+        booksMap.put(bookDTO2.getId(), bookDTO2);
+        booksMap.put(bookDTO3.getId(), bookDTO3);
     }
 
     @Override
-    public List<Book> getAllBooks(){
+    public List<BookDTO> getAllBooks(){
         return new ArrayList<>(booksMap.values());
     }
     @Override
-    public Book getBookById(UUID id) {
+    public Optional<BookDTO> getBookById(UUID id) {
         log.debug("Hello From Service" + id);
-        return booksMap.get(id);
+        return Optional.of(booksMap.get(id));
     }
 
     @Override
-    public Book creeateNewBook(Book book) {
-        Book newBook = Book.builder()
+    public BookDTO creeateNewBook(BookDTO bookDTO) {
+        BookDTO newBookDTO = BookDTO.builder()
                 .id(UUID.randomUUID())
-                .title(book.getTitle())
-                .isbn(book.getIsbn())
-                .quantityOnHand(book.getQuantityOnHand())
-                .author(book.getAuthor())
-                .price(book.getPrice())
+                .title(bookDTO.getTitle())
+                .isbn(bookDTO.getIsbn())
+                .quantityOnHand(bookDTO.getQuantityOnHand())
+                .author(bookDTO.getAuthor())
+                .price(bookDTO.getPrice())
                 .createdData(LocalDateTime.now())
                 .updatedDate(LocalDateTime.now())
                 .version(1)
                 .build();
-        booksMap.put(newBook.getId(),newBook);
-        return booksMap.get(newBook.getId());
+        booksMap.put(newBookDTO.getId(), newBookDTO);
+        return booksMap.get(newBookDTO.getId());
     }
 
     @Override
-    public void updateBookById(UUID id, Book book) {
-        Book existBook = booksMap.get(id);
-        existBook.setAuthor(book.getAuthor());
-        existBook.setTitle(book.getTitle());
-        existBook.setPrice(book.getPrice());
-        existBook.setQuantityOnHand(book.getQuantityOnHand());
-        existBook.setIsbn(book.getIsbn());
+    public void updateBookById(UUID id, BookDTO bookDTO) {
+        BookDTO existBookDTO = booksMap.get(id);
+        existBookDTO.setAuthor(bookDTO.getAuthor());
+        existBookDTO.setTitle(bookDTO.getTitle());
+        existBookDTO.setPrice(bookDTO.getPrice());
+        existBookDTO.setQuantityOnHand(bookDTO.getQuantityOnHand());
+        existBookDTO.setIsbn(bookDTO.getIsbn());
 
-        booksMap.put(existBook.getId(),existBook);
+        booksMap.put(existBookDTO.getId(), existBookDTO);
     }
 
     @Override
@@ -101,25 +101,25 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public void updateBookByIdByPatchMethod(UUID id, Book book) {
-        Book existBook = booksMap.get(id);
+    public void updateBookByIdByPatchMethod(UUID id, BookDTO bookDTO) {
+        BookDTO existBookDTO = booksMap.get(id);
 
-        if(StringUtils.hasText(existBook.getTitle())){
-           existBook.setTitle(book.getTitle());
+        if(StringUtils.hasText(existBookDTO.getTitle())){
+           existBookDTO.setTitle(bookDTO.getTitle());
         }
-        if(StringUtils.hasText(existBook.getIsbn())){
-            existBook.setIsbn(book.getIsbn());
+        if(StringUtils.hasText(existBookDTO.getIsbn())){
+            existBookDTO.setIsbn(bookDTO.getIsbn());
         }
-        if(existBook.getPrice() != null){
-            existBook.setPrice(book.getPrice());
+        if(existBookDTO.getPrice() != null){
+            existBookDTO.setPrice(bookDTO.getPrice());
         }
-        if(existBook.getQuantityOnHand() != null){
-            existBook.setQuantityOnHand(book.getQuantityOnHand());
+        if(existBookDTO.getQuantityOnHand() != null){
+            existBookDTO.setQuantityOnHand(bookDTO.getQuantityOnHand());
         }
-        if(StringUtils.hasText(existBook.getAuthor())){
-            existBook.setAuthor(book.getAuthor());
+        if(StringUtils.hasText(existBookDTO.getAuthor())){
+            existBookDTO.setAuthor(bookDTO.getAuthor());
         }
 
-        booksMap.put(existBook.getId(),existBook);
+        booksMap.put(existBookDTO.getId(), existBookDTO);
     }
 }

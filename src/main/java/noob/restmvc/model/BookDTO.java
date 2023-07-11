@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Builder
 @Data
-public class Book {
+public class BookDTO {
 
     private UUID id;
     private Integer version;

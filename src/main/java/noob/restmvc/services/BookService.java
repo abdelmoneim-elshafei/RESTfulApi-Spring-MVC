@@ -1,20 +1,21 @@
 package noob.restmvc.services;
 
-import noob.restmvc.model.Book;
+import noob.restmvc.model.BookDTO;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface BookService {
-    List<Book> getAllBooks();
+    List<BookDTO> getAllBooks();
 
-    Book getBookById(UUID id);
+    Optional<BookDTO> getBookById(UUID id);
 
-    Book creeateNewBook(Book book);
+    BookDTO creeateNewBook(BookDTO bookDTO);
 
-    void updateBookById(UUID id, Book book);
+    void updateBookById(UUID id, BookDTO bookDTO);
 
     void deleteBookById(UUID id);
 
-    void updateBookByIdByPatchMethod(UUID id, Book book);
+    void updateBookByIdByPatchMethod(UUID id, BookDTO bookDTO);
 }
