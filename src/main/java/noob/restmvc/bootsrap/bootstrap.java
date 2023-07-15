@@ -2,23 +2,84 @@ package noob.restmvc.bootsrap;
 
 import lombok.RequiredArgsConstructor;
 import noob.restmvc.entity.Book;
+import noob.restmvc.entity.Customer;
+import noob.restmvc.model.BookCSVRecord;
 import noob.restmvc.repository.BookRepository;
+import noob.restmvc.repository.CustomerRepository;
+import noob.restmvc.services.BookCSVService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ResourceUtils;
+import org.springframework.util.StringUtils;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class bootstrap implements CommandLineRunner {
     private final BookRepository bookRepository;
+    private final BookCSVService bookCSVService;
+    private final CustomerRepository customerRepository;
+
+    @Transactional
     @Override
     public void run(String... args) throws Exception {
-        loadBookData();
+        //loadBookData();
+        loadBookFromCSV();
+        loadCustomersData();
+
     }
-    public void loadBookData(){
+    private void loadCustomersData(){
+        Customer customer1 = Customer.builder()
+                .name("John Doe")
+                .email("johndoe@example.com")
+                .build();
+
+        Customer customer2 = Customer.builder()
+                .name("Abdo Doen")
+                .email("AbdoDoen@example.com")
+                .build();
+
+        Customer customer3 = Customer.builder()
+                .name("Ahmed Eid")
+                .email("AhmedEid@example.com")
+                .build();
+
+
+        // Save the customers to the repository
+        customerRepository.save(customer1);
+        customerRepository.save(customer2);
+        customerRepository.save(customer3);
+    }
+
+    private void loadBookFromCSV() throws FileNotFoundException {
+        if (bookRepository.count() == 0) {
+
+            File file = ResourceUtils.getFile("classpath:csvdata/books.csv");
+            List<BookCSVRecord> list = bookCSVService.convertCSV(file);
+
+            list.forEach(bookCSVRecord -> {
+                if (StringUtils.hasText(bookCSVRecord.getIsbn()) &&
+                        StringUtils.hasText(bookCSVRecord.getTitle()) &&
+                        StringUtils.hasText(bookCSVRecord.getAuthor())) {
+                    bookRepository.save(Book.builder()
+                            .isbn(bookCSVRecord.getIsbn())
+                            .author(org.apache.commons.lang3.StringUtils.abbreviate(bookCSVRecord.getAuthor(), 250))
+                            .title(org.apache.commons.lang3.StringUtils.abbreviate(bookCSVRecord.getTitle(), 50))
+                            .price(BigDecimal.TEN)
+                            .quantityOnHand(100 + (int) (Math.random() * ((500 - 100) + 1)))
+                            .build());
+                }
+
+            });
+        }
+    }
+
+    public void loadBookData() {
         Book book1 = Book.builder()
                 .title("To Kill a Mockingbird")
                 .isbn("9780061120084")

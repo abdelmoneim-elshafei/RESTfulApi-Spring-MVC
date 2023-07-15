@@ -1,0 +1,52 @@
+[
+  {
+    "codes": [
+      "NotBlank.bookDTO.title",
+      "NotBlank.title",
+      "NotBlank.java.lang.String",
+      "NotBlank"
+    ],
+    "arguments": [
+      {
+        "codes": [
+          "bookDTO.title",
+          "title"
+        ],
+        "arguments": null,
+        "defaultMessage": "title",
+        "code": "title"
+      }
+    ],
+    "defaultMessage": "must not be blank",
+    "objectName": "bookDTO",
+    "field": "title",
+    "rejectedValue": null,
+    "bindingFailure": false,
+    "code": "NotBlank"
+  },
+  {
+    "codes": [
+      "NotNull.bookDTO.title",
+      "NotNull.title",
+      "NotNull.java.lang.String",
+      "NotNull"
+    ],
+    "arguments": [
+      {
+        "codes": [
+          "bookDTO.title",
+          "title"
+        ],
+        "arguments": null,
+        "defaultMessage": "title",
+        "code": "title"
+      }
+    ],
+    "defaultMessage": "must not be null",
+    "objectName": "bookDTO",
+    "field": "title",
+    "rejectedValue": null,
+    "bindingFailure": false,
+    "code": "NotNull"
+  }
+]

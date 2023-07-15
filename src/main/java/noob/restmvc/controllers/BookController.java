@@ -2,15 +2,15 @@ package noob.restmvc.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import noob.restmvc.exception.NotFoundException;
 import noob.restmvc.model.BookDTO;
 import noob.restmvc.services.BookService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -22,8 +22,11 @@ public class BookController {
    private final BookService bookService;
 
    @GetMapping(BOOK_PATH)
-   List<BookDTO> getAllBooks(){
-      return bookService.getAllBooks();
+   Page<BookDTO> getAllBooks(@RequestParam(required = false) String title,
+                             @RequestParam(required = false) String isbn,
+                             @RequestParam(required = false) Integer pageNumber,
+                             @RequestParam(required = false) Integer  pageSize){
+      return bookService.getAllBooks(title, isbn, pageNumber, pageSize);
    }
 
    @GetMapping(BOOK_PATH_ID)
@@ -33,7 +36,7 @@ public class BookController {
    }
 
    @PostMapping(BOOK_PATH)
-   ResponseEntity<?> createNewBook(@RequestBody BookDTO bookDTO){
+   ResponseEntity<?> createNewBook(@Validated @RequestBody BookDTO bookDTO){
       BookDTO savedBookDTO = bookService.creeateNewBook(bookDTO);
       HttpHeaders headers = new HttpHeaders();
       headers.add("Location",BOOK_PATH + "/" + savedBookDTO.getId());

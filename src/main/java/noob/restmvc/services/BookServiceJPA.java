@@ -7,6 +7,9 @@ import noob.restmvc.mapper.BookMapper;
 import noob.restmvc.model.BookDTO;
 import noob.restmvc.repository.BookRepository;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -21,12 +24,49 @@ import java.util.stream.Collectors;
 public class BookServiceJPA implements BookService {
     private final BookRepository bookRepository;
     private final BookMapper mapper;
+    private final  Integer PAGE_SIZE = 25;
+    private final  Integer PAGE_NUMBER= 0;
 
     @Override
-    public List<BookDTO> getAllBooks() {
-        return bookRepository.findAll().stream()
-                .map(mapper::bookToBookDTO)
-                .collect(Collectors.toList());
+    public Page<BookDTO> getAllBooks(String title, String isbn, Integer pageNumber, Integer PageSize) {
+        PageRequest pageRequest = createPageRequest(pageNumber,PageSize);
+        Page<Book> books;
+        if(StringUtils.hasText(title)){
+            books = listBookByTitle(title,pageRequest);
+        }else if(StringUtils.hasText(isbn)){
+           books = listBookByIsbn(isbn,pageRequest);
+        }else {
+            books = bookRepository.findAll(pageRequest);
+        }
+        return books.map(mapper::bookToBookDTO);
+    }
+
+    PageRequest createPageRequest(Integer pageNumber, Integer PageSize){
+        int queryPageNo;
+        int queryPageSi;
+        if(pageNumber != null && pageNumber > 0){
+          queryPageNo = pageNumber;
+        }else {
+            queryPageNo = PAGE_NUMBER;
+        }
+        if(PageSize == null){
+            queryPageSi = PAGE_SIZE;
+        }else {
+            if(PageSize > 500)
+                queryPageSi = 500;
+            else
+                queryPageSi =PageSize;
+        }
+        Sort sort = Sort.by(Sort.Order.asc("title"));
+        return PageRequest.of(queryPageNo,queryPageSi,sort);
+
+    }
+
+    Page<Book> listBookByTitle(String title,PageRequest p){
+        return bookRepository.findBookByTitleLikeIgnoreCase(title, p);
+    }
+    Page<Book> listBookByIsbn(String isbn, PageRequest p){
+        return bookRepository.findBookByIsbn(isbn, p);
     }
 
     @Override

@@ -2,6 +2,8 @@ package noob.restmvc.services;
 
 import lombok.extern.slf4j.Slf4j;
 import noob.restmvc.model.BookDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -57,8 +59,8 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<BookDTO> getAllBooks(){
-        return new ArrayList<>(booksMap.values());
+    public Page<BookDTO> getAllBooks(String title, String isbn, Integer pageNumber, Integer PageSize){
+        return new PageImpl<>(new ArrayList<>(booksMap.values()));
     }
     @Override
     public Optional<BookDTO> getBookById(UUID id) {

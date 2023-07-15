@@ -12,9 +12,10 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -55,30 +56,44 @@ class BookControllerTest {
     }
 
     @Test
+    void createNewBookNullName() throws Exception {
+        BookDTO bookDTO = BookDTO.builder().build();
+        given(bookService.creeateNewBook(any(BookDTO.class)))
+                .willReturn(impl.getAllBooks(null, null, 0, 25).getContent().get(0));
+        MvcResult mvcResult = mockMvc.perform(post(BookController.BOOK_PATH)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(bookDTO))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(400)).andReturn();
+
+        System.out.println(mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
     void getByIdNotFound() throws Exception {
         given(bookService.getBookById(any(UUID.class))).willThrow(NotFoundException.class);
-        mockMvc.perform(get(BookController.BOOK_PATH_ID,UUID.randomUUID()))
+        mockMvc.perform(get(BookController.BOOK_PATH_ID, UUID.randomUUID()))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void updateBookByIdByPatchMethod() throws Exception{
-       BookDTO bookDTO = impl.getAllBooks().get(0);
-       Map<String , String> bookMap = new HashMap<>();
-       bookMap.put("title","NewTitle");
-       mockMvc.perform(patch(BookController.BOOK_PATH_ID , bookDTO.getId())
-               .content(objectMapper.writeValueAsBytes(bookMap))
-               .contentType(MediaType.APPLICATION_JSON)
-               .accept(MediaType.APPLICATION_JSON))
-               .andExpect(status().isNoContent());
-       verify(bookService).updateBookByIdByPatchMethod(captor.capture(),bookCaptor.capture());
-       assertThat(bookDTO.getId()).isEqualTo(captor.getValue());
-       assertThat(bookMap.get("title")).isEqualTo(bookCaptor.getValue().getTitle());
+    void updateBookByIdByPatchMethod() throws Exception {
+        BookDTO bookDTO = impl.getAllBooks(null, null, 0, 25).getContent().get(0);
+        Map<String, String> bookMap = new HashMap<>();
+        bookMap.put("title", "NewTitle");
+        mockMvc.perform(patch(BookController.BOOK_PATH_ID, bookDTO.getId())
+                        .content(objectMapper.writeValueAsBytes(bookMap))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+        verify(bookService).updateBookByIdByPatchMethod(captor.capture(), bookCaptor.capture());
+        assertThat(bookDTO.getId()).isEqualTo(captor.getValue());
+        assertThat(bookMap.get("title")).isEqualTo(bookCaptor.getValue().getTitle());
     }
 
     @Test
     void getBookById() throws Exception {
-        BookDTO bookDTO = impl.getAllBooks().get(0);
+        BookDTO bookDTO = impl.getAllBooks(null, null, 0, 25).getContent().get(0);
         given(bookService.getBookById(bookDTO.getId())).willReturn(Optional.of(bookDTO));
 
         mockMvc.perform(get(BookController.BOOK_PATH_ID, bookDTO.getId())
@@ -96,13 +111,13 @@ class BookControllerTest {
 
     @Test
     void getAllBooks() throws Exception {
-        List<BookDTO> bookDTOS = impl.getAllBooks();
-        when(bookService.getAllBooks()).thenReturn(bookDTOS);
+        Page<BookDTO> bookDTOS = impl.getAllBooks(null, null, 0, 25);
+        when(bookService.getAllBooks(any(), any(), any(), any())).thenReturn(bookDTOS);
         mockMvc.perform(get(BookController.BOOK_PATH)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.length()", is(bookDTOS.size())));
+                .andExpect(jsonPath("$.content.length()", is(bookDTOS.getContent().size())));
 
     }
 
@@ -129,8 +144,8 @@ class BookControllerTest {
 
     @Test
     void updateBookById() throws Exception {
-        BookDTO bookDTO = impl.getAllBooks().get(0);
-        mockMvc.perform(put(BookController.BOOK_PATH_ID , bookDTO.getId())
+        BookDTO bookDTO = impl.getAllBooks(null, null, 0, 25).getContent().get(0);
+        mockMvc.perform(put(BookController.BOOK_PATH_ID, bookDTO.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(bookDTO)))
@@ -143,8 +158,8 @@ class BookControllerTest {
     @Test
     void deleteBookById() throws Exception {
 
-        BookDTO bookDTO = impl.getAllBooks().get(0);
-        mockMvc.perform(delete(BookController.BOOK_PATH_ID , bookDTO.getId())
+        BookDTO bookDTO = impl.getAllBooks(null, null, 0, 25).getContent().get(0);
+        mockMvc.perform(delete(BookController.BOOK_PATH_ID, bookDTO.getId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
